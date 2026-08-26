@@ -1,0 +1,15 @@
+{
+  "name": "ai-tools",
+  "description": "gzp79's shared Claude skills and tools.",
+  "owner": {
+    "name": "gzp79",
+    "url": "https://github.com/gzp79/ai-tools"
+  },
+  "plugins": [
+    {
+      "name": "shine-skills",
+      "source": "./plugins/shine-skills",
+      "description": "Shared Claude skills used across gzp79's projects."
+    }
+  ]
+}

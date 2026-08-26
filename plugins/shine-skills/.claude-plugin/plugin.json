@@ -1,0 +1,11 @@
+{
+  "name": "shine-skills",
+  "version": "0.1.0",
+  "description": "Shared Claude skills used across gzp79's projects.",
+  "author": {
+    "name": "gzp79",
+    "url": "https://github.com/gzp79"
+  },
+  "repository": "https://github.com/gzp79/ai-tools",
+  "keywords": ["skills", "sdp", "spec-driven"]
+}
