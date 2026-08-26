@@ -7,10 +7,13 @@ Translates harsh code review comments into warm, encouraging messages — right 
 ### 1. Start the local server
 
 ```bash
+cd tools
+pnpm install          # first time only, installs @anthropic-ai/bedrock-sdk
 pnpm run hp-translator
 ```
 
-This starts a local proxy on `http://localhost:3033` that calls `claude -p` with the hp-translator skill.
+This starts a local proxy on `http://localhost:3033` that calls Claude (via AWS
+Bedrock) with the hp-translator skill (`plugins/shine-skills/skills/hp-translator/SKILL.md`).
 
 ### 2. Install Tampermonkey
 
@@ -35,7 +38,7 @@ This starts a local proxy on `http://localhost:3033` that calls `claude -p` with
 
 ### 4. Use it
 
-1. Make sure the server is running (`pnpm run hp-translator`)
+1. Make sure the server is running (`pnpm run hp-translator` from `tools/`)
 2. Open a GitHub PR and start a review comment
 3. Write your comment (English, Hungarian, or mixed)
 4. Click the **HP-Translator** button next to Cancel/Comment

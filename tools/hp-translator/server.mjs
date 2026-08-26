@@ -5,7 +5,7 @@ import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
-const skillPath = join(__dirname, '..', '..', '.claude', 'skills', 'hp-translator', 'SKILL.md');
+const skillPath = join(__dirname, '..', '..', 'plugins', 'shine-skills', 'skills', 'hp-translator', 'SKILL.md');
 const skillContent = readFileSync(skillPath, 'utf-8');
 
 const PORT = 3033;

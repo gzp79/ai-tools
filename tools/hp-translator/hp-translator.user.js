@@ -8,8 +8,7 @@
 // @connect      localhost
 // ==/UserScript==
 
-/* eslint-disable @typescript-eslint/no-unused-vars */
-/* eslint-disable @stylistic/quotes */
+/* eslint-disable no-unused-vars */
 (function () {
     'use strict';
 

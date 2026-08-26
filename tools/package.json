@@ -1,0 +1,32 @@
+{
+    "name": "ai-tools-scripts",
+    "version": "0.1.0",
+    "private": true,
+    "description": "Standalone utility scripts (not integrated into Claude). Run via the pnpm scripts below.",
+    "type": "module",
+    "engines": {
+        "node": ">=18",
+        "pnpm": ">=9"
+    },
+    "scripts": {
+        "hp-translator": "node hp-translator/server.mjs",
+        "bedrock-usage": "node aws/bedrock-usage.mjs",
+        "bedrock-logging-audit": "node aws/bedrock-logging-audit.mjs",
+        "aggregate-claude-costs": "node aws/aggregate-claude-costs.mjs",
+        "format": "prettier --write .",
+        "format:check": "prettier --check .",
+        "lint": "prettier --check . && eslint .",
+        "lint:fix": "prettier --write . && eslint . --fix",
+        "check": "pnpm run lint"
+    },
+    "dependencies": {
+        "@anthropic-ai/bedrock-sdk": "^0.33.1"
+    },
+    "devDependencies": {
+        "@eslint/js": "^10.0.1",
+        "eslint": "^10.9.1",
+        "eslint-config-prettier": "^10.1.8",
+        "globals": "^17.11.0",
+        "prettier": "^3.9.6"
+    }
+}

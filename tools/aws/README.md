@@ -5,7 +5,11 @@ Utility scripts for monitoring AWS resource usage.
 ## Prerequisites
 
 - [AWS CLI](https://aws.amazon.com/cli/) installed and configured (`aws configure`)
-- Node.js 18+
+- Node.js 18+ and [pnpm](https://pnpm.io/)
+- Install dependencies once from the `tools/` dir: `pnpm install`
+
+> The commands below are run from the `tools/` directory. Trailing arguments are
+> forwarded to the script (e.g. `pnpm bedrock-usage 7`).
 
 ### useful aws commands
 
@@ -22,22 +26,22 @@ Fetches AWS Bedrock API invocation history from CloudTrail and prints a usage su
 
 ```bash
 # Default: last 3 days, us-east-1, 6 parallel workers
-node tools/aws/bedrock-usage.mjs
+pnpm bedrock-usage
 
 # Custom days
-node tools/aws/bedrock-usage.mjs 7
+pnpm bedrock-usage 7
 
 # Custom days + concurrency
-node tools/aws/bedrock-usage.mjs 14 8
+pnpm bedrock-usage 14 8
 
 # Custom days + concurrency + region
-node tools/aws/bedrock-usage.mjs 14 8 eu-west-1
+pnpm bedrock-usage 14 8 eu-west-1
 
 # All known Bedrock regions
-node tools/aws/bedrock-usage.mjs 3 6 all
+pnpm bedrock-usage 3 6 all
 
 # Region via env var
-BEDROCK_REGION=eu-west-1 node tools/aws/bedrock-usage.mjs
+BEDROCK_REGION=eu-west-1 pnpm bedrock-usage
 ```
 
 ### Output
@@ -53,10 +57,10 @@ Checks whether the current AWS account has any Bedrock prompt/response logging c
 
 ```bash
 # Check all known Bedrock regions (default)
-node tools/aws/bedrock-logging-audit.mjs
+pnpm bedrock-logging-audit
 
 # Check specific regions only
-node tools/aws/bedrock-logging-audit.mjs us-east-1,us-west-2
+pnpm bedrock-logging-audit us-east-1,us-west-2
 ```
 
 ### Output
@@ -64,3 +68,26 @@ node tools/aws/bedrock-logging-audit.mjs us-east-1,us-west-2
 - **Per-region checks** - invocation logging (S3/CloudWatch), guardrails, VPC endpoints, and Bedrock-related CW log groups
 - **CloudTrail check** - whether any trail has Bedrock data event selectors enabled
 - **Summary** - clear verdict on whether prompt/response content is being captured
+
+## aggregate-claude-costs.mjs
+
+Estimates your local Claude Code spend by parsing the session logs under
+`~/.claude/projects/**/*.jsonl`. It sums input/output/cache tokens per model and
+applies hard-coded AWS Bedrock (us-east-1) pricing to compute a cost. No AWS
+credentials or network calls are needed — it reads local files only.
+
+> Pricing and the recognized model list are hard-coded in the script (Sonnet 4.5/4.6,
+> Haiku 4.5, Opus 4.6). Unknown models are counted at $0, so update `PRICING` and
+> `normalizeModelName` when new models appear.
+
+### Usage
+
+```bash
+pnpm aggregate-claude-costs
+```
+
+### Output
+
+- **Total usage across all projects** - per-model token counts and estimated cost
+- **Grand total** - summed estimated cost across every model
+- **Cost by project** - per-project totals, sorted highest first (zero-cost projects hidden)
