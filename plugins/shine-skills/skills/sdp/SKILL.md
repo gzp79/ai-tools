@@ -1,212 +1,122 @@
 ---
 name: sdp
 description: >
-    Spec-Driven Practice — keep a feature's living HTML design doc
-    (docs/<domain>/<feature>.html) and its code in agreement. One skill for the
-    whole doc↔code loop: write/update a doc, implement code from a doc, or refresh
-    a stale doc from the code. It figures out which side is ahead and moves the
-    other to match; when both moved or they genuinely conflict, it asks which is
-    the source of truth. Trigger on: "spec out", "design", "plan a feature",
-    "write/update the doc for", "implement the doc", "build the feature from the
-    doc", "make the code match the doc" / "make the doc match the code", "sync the
-    doc", "doc is stale", "doc says X but the code does Y", "check this doc",
-    explicit sdp. Supersedes the old sdp-doc / sdp-code pair.
+    Use when a feature's design doc (docs/<domain>/<feature>.md) and its code
+    need to agree: spec out or design a feature, write or update its doc,
+    implement code from a doc, refresh a stale doc from the code, or resolve
+    "the doc says X but the code does Y". Triggers on "spec out", "plan a
+    feature", "implement the doc", "make the code match the doc", "sync the
+    doc", "doc is stale", "check this doc", explicit sdp.
 ---
 
 # SDP — Spec-Driven Practice (doc ↔ code)
 
-A feature lives as a human-first HTML design doc and as code. This skill keeps
-the two in agreement. It never runs git or commits — the user reviews and
-stages. Where docs live, the domain layout, and the doc-format contract are
-project facts: see CLAUDE.md → _Design docs_ and
-[references/conventions.md](references/conventions.md).
+A feature lives as a short Markdown design doc and as code. This skill keeps the
+two in agreement. First job: **detect which side is ahead**, then move the other
+to match; ask only when that is genuinely unclear. It never runs git or commits —
+the user reviews and stages.
 
-The old split (sdp-doc writes docs, sdp-code writes code) forced you to pick the
-skill before you knew which artifact should change. Here you don't pick: the
-skill's first job is to **detect which side is ahead**, then move the other to
-match. You only stop to ask when that's genuinely unclear.
+Doc location and domain layout are project facts (CLAUDE.md → _Design docs_).
+The doc format is a strict contract:
+[references/conventions.md](references/conventions.md) — read it once per session
+before writing or judging a doc.
 
-Read [references/conventions.md](references/conventions.md) once per session
-before writing or reasoning about any doc — the doc format is a strict contract
-and everything below assumes it. Skip if already read this session.
+## Preamble (every run)
 
-## Preamble (every run, in order)
+1. **Locate the doc** from the project's doc layout and the filename rules in
+   conventions. Glob to confirm it exists or is missing. Ambiguous feature,
+   domain, or target → ask.
+2. **Conformance check** (doc exists): run the conformance checklist from
+   conventions. Mechanical fixes (filename suffix, untagged collapsible, stray
+   date/status line, change badges, change-log prose, roadmap boxes, missing file
+   map) are applied inline. A fix that would change _meaning_ rather than form is
+   a design question — ask.
 
-1. **Locate the doc.** Resolve the doc path from the project's doc layout
-   (CLAUDE.md → _Design docs_) and the filename rules in
-   [references/conventions.md](references/conventions.md) → _File layout_. Glob
-   the docs tree to confirm the doc exists or is missing. If the feature name,
-   domain, or target doc is ambiguous, ask (see _Asking_).
-2. **Ensure the stylesheet is current** (whenever this run will create or modify
-   a doc — Write doc or Sync doc; skip for Write code). The visual language lives
-   in a versioned `doc.css`. This skill's [references/doc.css](references/doc.css)
-   is **canonical**; the project's `docs/doc.css` is an installed **mirror**.
-   Compare versions by reading **only the header** of each file (the
-   `doc-css-version:` integer — e.g. the first ~8 lines; never load the whole
-   stylesheet into context) and act:
-    - **Missing** in the project → copy the reference to `docs/doc.css`.
-    - **Older** (project version < reference) → overwrite `docs/doc.css` with the
-      reference.
-    - **Same** → nothing to do.
-    - **Newer** (project version > reference) → do **not** touch it. The skill's
-      reference is behind the project; flag it in the hand-off (the skill copy
-      likely needs updating, or a local edit drifted the file).
-   Do the copy/overwrite as a **filesystem copy** (`cp <reference> docs/doc.css`),
-   not a read-then-write through the model — that keeps it byte-for-byte verbatim
-   and spends no tokens on the CSS. Never hand-edit `docs/doc.css` or partially
-   patch it — it is a managed mirror and any local change is drift the next run
-   overwrites. New styles are added to the reference only (see conventions →
-   _Stylesheet versioning_).
-3. **Conformance check** (only if the doc exists). Run the conformance checklist
-   from conventions. Because this is one skill that both reads and writes the
-   doc, fixes are applied inline — there is no cross-skill handoff and no hard
-   restart:
-    - Clean → continue.
-    - Cosmetic (rename suffix, untagged `<details>`, stray date/status line) →
-      fix inline, continue. Mechanical; no need to ask.
-    - Structural (change badges, status column, inline cosmetic CSS, change-log
-      prose, roadmap boxes, missing file map) → fix inline so the doc is
-      readable, then continue. If a structural fix would change _meaning_ rather
-      than form, that's a design question — ask (see _Asking_).
+## Detect direction
 
-## Detect direction (the front door)
-
-After the preamble, decide which side is authoritative and route. Use the code
-survey (below) and the request wording together — don't guess when they
+Combine the code survey (below) with the request wording; don't guess when they
 disagree.
 
-| Situation                                                                                             | Direction           | Section                                                             |
-| ----------------------------------------------------------------------------------------------------- | ------------------- | ------------------------------------------------------------------- |
-| No doc, feature is genuinely new                                                                      | doc is the new work | **Write doc → (new)**                                               |
-| Doc exists, code missing/behind it                                                                    | doc leads           | **Write code**                                                      |
-| Code exists, doc missing or stale                                                                     | code leads          | **Sync doc**                                                        |
-| Both moved since they agreed, **or** doc and code genuinely contradict, **or** unclear which is right | —                   | **Ask which is the source of truth**, then route to the losing side |
+| Situation                                                    | Direction | Route                                      |
+| ------------------------------------------------------------ | --------- | ------------------------------------------ |
+| No doc, feature is new                                       | doc leads | **Write doc**                              |
+| Doc exists, code missing or behind                           | doc leads | **Write code**                             |
+| Code exists, doc missing or stale                            | code leads| **Sync doc**                               |
+| Both moved, genuinely contradict, or unclear which is right  | —         | **Ask** which is the source of truth, then change the losing side |
 
-There is no standing "doc always wins" default. The request verb is a strong
-hint ("spec out / design" → doc leads; "implement / build from the doc" → code
-follows; "sync the doc / doc is stale" → code leads), but confirm it against
-reality: if the wording says "implement the doc" yet the code already matches
-and has moved _past_ the doc, that's the ambiguous row — ask.
+No standing "doc wins" default. Verbs hint ("design / implement the doc" → doc
+leads; "sync / doc is stale" → code leads) but confirm against reality: "implement
+the doc" when the code already moved _past_ it is the ambiguous row — ask.
 
-### Surveying the code
+**Surveying the code** (Write code, Sync doc): start from the doc's file map. If
+it has ≥6 entries, ≥3 top-level dirs, or the behaviour isn't locatable from it,
+run parallel Explore agents; otherwise read directly. Verify contracts from
+source — never copy an agent's paraphrase into a doc or plan.
 
-Both "write code" and "sync doc" start by reading the code the doc describes.
-From the doc's file map: if ≥6 entries, ≥3 top-level dirs, or the behavior isn't
-locatable from the map, spawn parallel Explore agents; otherwise read directly.
-Verify the real contract from source — never bake an agent's paraphrase into a
-doc or a plan.
+## Write doc (new feature or intent-driven change)
 
-## Write doc (new feature)
-
-The doc is the desired state and doesn't exist yet.
-
-1. **Brainstorm** via `superpowers:brainstorming`. Tell it the artifact is HTML
-   at the doc path and to suppress its own markdown write step. Skip only for a
-   small, well-understood addition to an existing doc.
-2. **Write the HTML** per conventions: correct depth-adjusted `doc.css` path,
-   standard sections, and a diagram in the layout that fits the flow (favor a
-   sequence diagram when there's any ordering / call-and-reply; otherwise layered
-   stack / horizontal / fan-out / lifecycle / spatial — pick by flow shape, reuse
-   an existing layout before adding CSS).
-3. Keep agent `<details>` blocks minimal — prefer the file map and inline source
-   references. For a not-yet-built feature, a block that just hands intent to the
-   implementer is fine; mark it `data-transient="true"` so a later sync drops it
-   once the code lands.
-4. **Self-review** against the conventions checklist; fix inline.
-5. **Hand off**: report the path. Next step is usually **Write code** to realize
-   it.
-
-_Updating an existing doc for an intent-driven change_ is the same path: survey
-the code first so you don't design against shipped behavior, brainstorm if the
-change is non-trivial, then edit surgically (don't regenerate from template).
+1. Survey existing code first so you don't design against shipped behaviour.
+2. Brainstorm via `superpowers:brainstorming`, telling it the artifact is the
+   Markdown doc at the doc path and to skip its own spec-write step. Skip only for
+   a small, well-understood edit.
+3. Write per conventions: standard sections, Mermaid diagram chosen by flow shape.
+   Edit existing docs surgically — never regenerate from template.
+4. A collapsible for a not-yet-built feature may carry intent to the implementer;
+   mark it `data-transient="true"` so a later sync drops it.
+5. Self-review against the conventions checklist; hand off the path (next step is
+   usually **Write code**).
 
 ## Write code (doc → code)
 
-Doc is ahead; the code must change to match it. Never edit the doc here — if the
-doc is what should change, you're in the wrong direction (re-check _Detect
-direction_).
+The doc is ahead; never edit it here — if the doc should change, re-check
+_Detect direction_.
 
-1. **Read the doc carefully** — especially the architecture/flow diagram, file
-   map, and `data-agent="implementation"` / `data-agent="test"` / other relevant
-   blocks. Treat `data-transient="true"` blocks as implementation intent to
-   consume now; note them as prune candidates for a later sync.
-2. **Survey code** (see above) and **diff** doc vs. impl: Matches / Missing /
-   Wrong / Stale / Ambiguous. On a genuine ambiguity, stop and ask — if it's a
-   design question, that's a doc change (switch direction).
-3. **Confirm scope** with a short diff list. Suggest splitting if large.
-4. **Route by size:**
-    - **Small diff** (a few clear, low-risk items — no architectural decisions,
-      no cross-cutting change, fits one focused sitting): offer {Implement
-      directly / Write a plan first}. If direct, implement the diff items now
-      against the doc — no plan file.
-    - **Otherwise**: invoke `superpowers:writing-plans`:
-        ```
-        spec: <doc path>
-        diff: missing/wrong/stale items
-        agent_blocks: implementation, test, relevant others
-        constraints: match doc; no redesign; no doc edits; test items → test tasks
-        ```
-5. **Hand off** — planned: "Plan written at `<path>`. Review, then run
-   executing-plans." Direct: report what changed. Either way, if incidental
-   drift appeared or transient blocks now have code, run **Sync doc** afterward
-   and name the blocks to prune.
+1. Read the doc: diagram, key rules, file map, and `data-agent` blocks.
+   `data-transient` blocks are intent to consume now and prune later.
+2. Survey the code and diff: Matches / Missing / Wrong / Stale / Ambiguous. A
+   design ambiguity is a doc change — stop and ask.
+3. Confirm scope as a short diff list; suggest splitting if large.
+4. Route by size. **Small** (few low-risk items, no architectural or
+   cross-cutting decisions): offer {implement directly / plan first}. **Otherwise**
+   invoke `superpowers:writing-plans` with the doc path, the diff, relevant
+   `data-agent` blocks, and constraints "match the doc; no redesign; no doc edits".
+5. Hand off: plan path (then `executing-plans`) or what changed. If drift
+   appeared or transient blocks now have code, run **Sync doc** and name the
+   blocks to prune.
 
 ## Sync doc (code → doc)
 
-Code is reality; refresh the doc to match, after which the doc is primary again.
+Code is reality; refresh the doc, after which the doc is primary again.
 
-1. **Survey code** (see above) from the doc's file map.
-2. **Diff** per section: In sync / Drifted / Removed / New-in-code / Suspicious.
-   Also flag agent blocks now satisfied by the code — any `data-transient="true"`
-   block whose code now exists, and any block that, now the code is readable,
-   merely restates it. These are _Prune_ candidates.
-3. **Confirm scope**: show a short bullet diff, prune candidates included. Ask
-   only about _Suspicious_ items (looks accidental, not designed — see _Asking_).
-   Don't ask about clear drift or routine prunes; apply them.
-4. **Rewrite** approved sections surgically (not from template). Replace prose
-   that paraphrases code with a source reference; remove prune-candidate blocks,
-   keeping only those with durable insight (summary / complexity / gotcha /
-   rationale). Desired state = current state after sync — no diff narrative, no
-   "previously did X".
-5. **Self-review**: read fresh — does the doc accurately predict the code?
-6. **Hand off**: what changed, any pending decisions.
+1. Survey the code from the file map.
+2. Diff per section: In sync / Drifted / Removed / New-in-code / Suspicious.
+   Collect _prune_ candidates: `data-transient` blocks whose code now exists, and
+   blocks that merely restate readable code.
+3. Show a short bullet diff incl. prunes. Ask only about _Suspicious_ items
+   (look accidental, not designed); apply clear drift and routine prunes.
+4. Rewrite surgically. Replace prose that paraphrases code with a source
+   reference; keep collapsibles only for durable insight. The result states the
+   current design — no diff narrative, no "previously".
+5. Read fresh: does the doc predict the code? Hand off what changed and pending
+   decisions.
 
 ## Asking
 
-Batch questions into one `AskUserQuestion` call, each item answered
-independently. Prefer yes/no options. The decision this skill exists to surface
-cleanly:
-
-- **Which is the source of truth?** When doc and code genuinely conflict, or both
-  moved: ask {Doc is right → change the code / Code is right → sync the doc},
-  then route to the losing side. Never pick silently on a real design
-  disagreement.
-
-Other common asks: suspicious code item during sync → {Document it / Leave out};
-ambiguous doc target → list candidate paths as options; a structural conformance
-fix that would change meaning → confirm the intended meaning first.
+Batch questions in one `AskUserQuestion`, yes/no where possible. Core question —
+**which is the source of truth?** {Doc is right → change code / Code is right →
+sync doc}; never pick silently on a real design disagreement. Others: suspicious
+code item → {Document it / Leave out}; ambiguous target → list candidate paths;
+meaning-changing conformance fix → confirm intent.
 
 ## Anti-patterns
 
-- Running git or committing (the user stages and commits, always).
-- Silent rewrites in Sync — show the diff first.
-- Change-log narrative, diff tables, "today vs proposed", change badges, dates,
-  status lines (git owns history — see conventions).
-- Prose where a diagram fits; untagged `<details>`; hand-rolled cosmetic CSS.
-- Out-of-scope nodes in a diagram — a box implies participation. Non-participants
-  (works without subscribing, rejected alternative, related neighbor) go in
-  prose, never a box, even dimmed (see conventions).
-- Agent `<details>` blocks that paraphrase the code instead of pointing at it, or
-  that survive after their code exists — prefer source refs; keep a block only
-  for durable insight.
-- Regenerating a whole doc from template when a surgical edit suffices.
+- Running git or committing.
+- Silent rewrites in Sync (show the diff first); regenerating a doc when a
+  surgical edit suffices.
+- Change-log narrative, "today vs proposed", change badges, dates, status lines,
+  roadmap content (git owns history).
+- Prose where a diagram fits; diagram nodes for non-participants.
+- Collapsibles that paraphrase code or outlive their code.
+- Editing the doc in **Write code**, or code in **Write doc** / **Sync doc**.
+- Baking accidental code into the doc during Sync — flag it Suspicious.
 - Skipping brainstorm on a genuinely new feature.
-- Editing the doc while in **Write code**, or editing code while in **Write
-  doc** / **Sync doc** — if the other side needs to change, re-check _Detect
-  direction_ and route.
-- Picking a direction silently when doc and code disagree — ask.
-- Baking accidental code into the doc during Sync — flag as Suspicious, ask.
-- Hand-editing a project's `docs/doc.css`, or adding new CSS classes there
-  instead of to the skill's reference doc.css with a `doc-css-version` bump — the
-  mirror is overwritten whenever it falls behind, so any local edit is drift that
-  silently disappears.

@@ -26,7 +26,7 @@ Or auto-enable it in a repo by committing to its `.claude/settings.json`:
 Pull updates with `/plugin marketplace update ai-tools`.
 
 **Shipped skills** (`plugins/shine-skills/skills/`):
-- `sdp` — Spec-Driven Practice: keep a feature's HTML design doc and its code in sync.
+- `sdp` — Spec-Driven Practice: keep a feature's Markdown (Mermaid) design doc and its code in sync.
 
 ## Tools
 
